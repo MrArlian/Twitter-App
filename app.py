@@ -77,7 +77,7 @@ class MainApp(tkinter.Frame):
                                               variable=BOOLVAR_3)
         self.checkbox_3.pack(padx=15, side=tkinter.RIGHT)
 
-        self.checkbox_2 = tkinter.Checkbutton(toplevel, style.INNER_CHECKBOX, text='Link',
+        self.checkbox_2 = tkinter.Checkbutton(toplevel, style.INNER_CHECKBOX, text='Like',
                                               variable=BOOLVAR_2)
         self.checkbox_2.pack(padx=15, side=tkinter.RIGHT)
 
