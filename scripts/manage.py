@@ -3,11 +3,11 @@ import random
 import time
 import os
 
-from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.common import exceptions
 from selenium import webdriver
 
 from selenium.webdriver.common.keys import Keys
@@ -55,7 +55,7 @@ def _login(driver: webdriver.Chrome, wait: WebDriverWait, user: str, password: s
         try:
             element = driver.find_element(By.CLASS_NAME, 'css-1dbjc4n.r-mk0yit.r-1f1sjgu')
             element.find_element(By.NAME, 'text')
-        except NoSuchElementException:
+        except exceptions.NoSuchElementException:
             raise InvalidPassword
         else:
             raise TwoFactor
@@ -105,7 +105,7 @@ def manage_account(self, event: StartEvent) -> None:
     try:
         driver = webdriver.Chrome(service=service, options=options)
         wait = WebDriverWait(driver, 20)
-    except WebDriverException:
+    except exceptions.WebDriverException:
         return logger.update('An error occurred while creating webdriver.')
 
     logger.update('Starting process!')
@@ -114,12 +114,16 @@ def manage_account(self, event: StartEvent) -> None:
     for user, password in utils.file_parser(account_path):
         try:
             _login(driver, wait, user, password)
-        except NoSuchElementException:
+        except exceptions.NoSuchElementException:
             logger.update(f'An unknown error occurred while logging into {user}')
         except TwoFactor:
             logger.update(f'{user} - Authorization Error: Two-Factor authentication.')
         except InvalidPassword:
             logger.update(f'{user} - Authorization Error: Wrong password.')
+        except exceptions.TimeoutException:
+            logger.update('Timed out please try again.')
+        else:
+            continue
 
         if driver.current_url != URL_HOME:
             continue
@@ -138,7 +142,7 @@ def manage_account(self, event: StartEvent) -> None:
                     liked(driver, wait, link)
                     logger.update(f'{user} - Liked post.')
 
-            except NoSuchElementException:
+            except exceptions.NoSuchElementException:
                 continue
 
         if actions >= event.action:

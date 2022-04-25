@@ -105,7 +105,7 @@ def write_account(status: str, user: str, password: str) -> None:
     """
 
     with open(os.path.join(DATA_DIR, f'{status}.txt'), 'a', encoding='utf-8') as file:
-        file.write(f'{user}:{password}')
+        file.write(f'{user}:{password}\n')
 
 
 class LogVar(tkinter.Variable):
@@ -113,19 +113,22 @@ class LogVar(tkinter.Variable):
     def __init__(self, root: tkinter.Tk, value: str = None, name: str = None) -> None:
         super().__init__(root, value, name)
 
-    def get(self) -> tuple:
+    def get(self) -> list:
         """
-            Return values as a tuple.
+            Return values as a list.
         """
 
-        return self._tk.globalgetvar(self._name)
+        return list(self._tk.globalgetvar(self._name))
 
     def update(self, value: str) -> None:
         """
-            Adds the given element to the end of the tuple.
+            Adds the given element to the beginning of the list.
         """
 
         if not isinstance(value, str):
             raise TypeError
 
-        self._tk.globalsetvar(self._name, (*self.get(), value))
+        data = self.get()
+        data.insert(0, value)
+
+        self._tk.globalsetvar(self._name, data)

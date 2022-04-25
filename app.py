@@ -17,8 +17,8 @@ root.minsize(1080, 540)
 
 FILES_PATH = {}
 
-TXTVAR_1 = tkinter.StringVar(root)
-TXTVAR_2 = tkinter.StringVar(root)
+TXTVAR_1 = tkinter.StringVar(root, value='Action')
+TXTVAR_2 = tkinter.StringVar(root, value='Time')
 
 BOOLVAR_1 = tkinter.BooleanVar(root)
 BOOLVAR_2 = tkinter.BooleanVar(root)
@@ -30,6 +30,18 @@ FILE_TYPES = (
 )
 
 logger = utils.LogVar(root)
+
+
+def focus_in(event: tkinter.Event, string: str) -> None:
+
+    if event.widget.get() == string:
+        event.widget.delete(0, tkinter.END)
+
+
+def focus_out(event: tkinter.Event, string: str) -> None:
+
+    if event.widget.get() == '':
+        event.widget.insert(0, string)
 
 
 class MainApp(tkinter.Frame):
@@ -63,9 +75,13 @@ class MainApp(tkinter.Frame):
 
 
         self.entry_1 = tkinter.Entry(toplevel, style.INNER_ENTRY, textvariable=TXTVAR_1)
+        self.entry_1.bind('<FocusIn>', lambda event: focus_in(event, 'action'))
+        self.entry_1.bind('<FocusOut>', lambda event: focus_out(event, 'action'))
         self.entry_1.pack(padx=20, side=tkinter.LEFT)
 
         self.entry_2 = tkinter.Entry(toplevel, style.INNER_ENTRY, textvariable=TXTVAR_2)
+        self.entry_2.bind('<FocusIn>', lambda event: focus_in(event, 'time'))
+        self.entry_2.bind('<FocusOut>', lambda event: focus_out(event, 'time'))
         self.entry_2.pack(padx=20, side=tkinter.LEFT)
 
 
@@ -165,4 +181,3 @@ class MainApp(tkinter.Frame):
 if __name__ == '__main__':
     app = MainApp(root)
     app.mainloop()
- 
