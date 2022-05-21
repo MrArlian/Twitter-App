@@ -21,14 +21,15 @@ LOGIN_URL = 'https://twitter.com/i/flow/login'
 URL_HOME = 'https://twitter.com/home'
 
 
-options = Options()
-options.add_argument('headless')
-options.add_argument('window-size=1920x935')
+OPTIONS = Options()
+OPTIONS.add_argument('--ignore-certificate-errors')
+OPTIONS.add_argument('window-size=1920x935')
+OPTIONS.add_argument('headless')
 
 if os.name == 'nt':
-    service = Service(os.path.join(os.getcwd(), 'static', 'chromedriver_nt.exe'))
+    SERVICE = Service(os.path.join(os.getcwd(), 'static', 'chromedriver_nt.exe'))
 else:
-    service = Service(os.path.join(os.getcwd(), 'static', 'chromedriver_mac'))
+    SERVICE = Service(os.path.join(os.getcwd(), 'static', 'chromedriver_mac'))
 
 
 class TwoFactor(Exception):
@@ -99,11 +100,15 @@ def manage_account(self, event: StartEvent) -> None:
 
     actions = 0
 
-    raw = utils.file_parser(proxy_path)
-    options.add_argument(f'--proxy-server={utils.get_proxy(raw)}')
+
+    if proxy_path:
+        logger.update('Run the proxy check... It will take some time!')
+
+        proxy = utils.check_proxy(utils.file_parser(proxy_path, True))
+        OPTIONS.add_argument(f'--proxy-server={proxy}')
 
     try:
-        driver = webdriver.Chrome(service=service, options=options)
+        driver = webdriver.Chrome(service=SERVICE, options=OPTIONS)
         wait = WebDriverWait(driver, 20)
     except exceptions.WebDriverException:
         return logger.update('An error occurred while creating webdriver.')
@@ -115,15 +120,13 @@ def manage_account(self, event: StartEvent) -> None:
         try:
             _login(driver, wait, user, password)
         except exceptions.NoSuchElementException:
-            logger.update(f'An unknown error occurred while logging into {user}')
+            logger.update(f'An unknown error occurred while logging in {user}')
         except TwoFactor:
             logger.update(f'{user} - Authorization Error: Two-Factor authentication.')
         except InvalidPassword:
             logger.update(f'{user} - Authorization Error: Wrong password.')
         except exceptions.TimeoutException:
             logger.update('Timed out please try again.')
-        else:
-            continue
 
         if driver.current_url != URL_HOME:
             continue
