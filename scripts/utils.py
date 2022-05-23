@@ -7,12 +7,15 @@ from requests import Session, exceptions
 import xlwt
 
 
-DATA_DIR = os.path.join(os.path.split(os.getcwd())[0], 'data')
 SESSION = Session()
 FIELDS_NAMES = (
     'Name', 'Registration',
     'Followers', 'Tweets'
 )
+
+
+if not os.path.isdir('data'):
+    os.mkdir('data')
 
 
 def check_internet() -> bool:
@@ -78,7 +81,7 @@ def write_data(data: typing.Iterable) -> None:
         for obj, col_x in zip(item, range(len(item))):
             sheet.write(row_x, col_x, obj)
 
-    book.save(os.path.join(DATA_DIR, 'user_data.xls'))
+    book.save('data/user_data.xls')
 
 
 def write_account(status: str, user: str, password: str) -> None:
@@ -86,7 +89,7 @@ def write_account(status: str, user: str, password: str) -> None:
         Create a file if it doesn't exist and append "Username: Password" to it.
     """
 
-    with open(os.path.join(DATA_DIR, f'{status}.txt'), 'a', encoding='utf-8') as file:
+    with open(f'data/{status}.txt', 'a', encoding='utf-8') as file:
         file.write(f'{user}:{password}\n')
 
 

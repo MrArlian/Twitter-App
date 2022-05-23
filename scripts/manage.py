@@ -145,7 +145,7 @@ def manage_account(self, event: StartEvent) -> None:
                     liked(driver, wait, link)
                     logger.update(f'{user} - Liked post.')
 
-            except exceptions.NoSuchElementException:
+            except (exceptions.NoSuchElementException, exceptions.TimeoutException):
                 continue
 
         if actions >= event.action:

@@ -124,7 +124,11 @@ def checking(self, event: StartEvent) -> None:
             continue
 
         logger.update(f'{user} - Successful login.')
-        users.append((user, *_grab_data(driver)))
+
+        try:
+            users.append((user, *_grab_data(driver)))
+        except (exceptions.NoSuchElementException, exceptions.TimeoutException):
+            continue
 
         if actions >= event.action:
             break
