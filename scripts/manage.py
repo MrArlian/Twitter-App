@@ -127,6 +127,8 @@ def manage_account(self, event: StartEvent) -> None:
             logger.update(f'{user} - Authorization Error: Wrong password.')
         except exceptions.TimeoutException:
             logger.update('Timed out please try again.')
+        except Exception:
+            logger.update('An unknown error occurred.')
 
         if driver.current_url != URL_HOME:
             continue

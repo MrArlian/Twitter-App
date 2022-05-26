@@ -110,7 +110,6 @@ def checking(self, event: StartEvent) -> None:
             _login(driver, wait, user, password)
         except exceptions.NoSuchElementException:
             logger.update(f'An unknown error occurred while logging in {user}')
-            continue
         except TwoFactor:
             logger.update(f'{user} - Authorization Error: Two-Factor authentication.')
             utils.write_account('2fa', user, password)
@@ -119,6 +118,8 @@ def checking(self, event: StartEvent) -> None:
             utils.write_account('badpass', user, password)
         except exceptions.TimeoutException:
             logger.update('Timed out please try again.')
+        except Exception:
+            logger.update('An unknown error occurred.')
 
         if driver.current_url != URL_HOME:
             continue
