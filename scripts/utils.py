@@ -2,12 +2,10 @@ import tkinter
 import typing
 import os
 
-from requests import Session, exceptions
-
-import xlwt
+import requests
 
 
-SESSION = Session()
+SESSION = requests.Session()
 FIELDS_NAMES = (
     'Name', 'Registration',
     'Followers', 'Tweets'
@@ -25,7 +23,7 @@ def check_internet() -> bool:
 
     try:
         SESSION.get('https://twitter.com', timeout=3)
-    except (exceptions.ConnectionError, exceptions.ConnectTimeout):
+    except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout):
         return False
     else:
         return True
@@ -43,9 +41,9 @@ def file_parser(path: str, is_proxy: bool = False) -> list:
         raw_data = file.readlines()
 
     if not is_proxy:
-        data = [row.rsplit()[0].split(':', 1) for row in raw_data]
+        data = [row.replace(' ', '').rsplit()[0].split(':', 1) for row in raw_data]
     else:
-        data = [row.rsplit()[0] for row in raw_data]
+        data = [row.replace(' ', '').rsplit()[0] for row in raw_data]
 
     return data
 
@@ -59,29 +57,10 @@ def check_proxy(proxies: typing.Iterable[str]) -> str:
         try:
             SESSION.get('https://twitter.com', proxies={'http': proxy, 'https': proxy}, timeout=3)
             return proxy
-        except (exceptions.ConnectTimeout, exceptions.ProxyError):
+        except (requests.exceptions.ConnectTimeout, requests.exceptions.ProxyError):
             pass
 
     return ''
-
-
-def write_data(data: typing.Iterable) -> None:
-    """
-        Сreate excel file with calons: Name, Registration Followers, Tweets.
-        It also writes data.
-    """
-
-    book = xlwt.Workbook()
-    sheet = book.add_sheet('Data')
-
-    for field, col_x in zip(FIELDS_NAMES, range(len(FIELDS_NAMES))):
-        sheet.write(0, col_x, field)
-
-    for item, row_x in zip(data, range(2, len(data) + 2)):
-        for obj, col_x in zip(item, range(len(item))):
-            sheet.write(row_x, col_x, obj)
-
-    book.save('data/user_data.xls')
 
 
 def write_account(status: str, user: str, password: str) -> None:

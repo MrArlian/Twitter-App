@@ -102,7 +102,7 @@ class MainApp(tkinter.Frame):
         self.checkbox_1.pack(padx=15, side=tkinter.RIGHT)
 
 
-        self.button_start = tkinter.Button(level_1, style.INNER_BUTTON_START, text='Start', 
+        self.button_start = tkinter.Button(level_1, style.INNER_BUTTON_START, text='Start',
                                            command=self.start_script)
         self.button_start.pack(side=tkinter.LEFT)
 
@@ -123,7 +123,7 @@ class MainApp(tkinter.Frame):
                                                filetypes=FILE_TYPES)
 
         if file_path:
-            FILES_PATH.update({f'{name}-path': file_path})
+            FILES_PATH.update({name: file_path})
             logger.update(f'File for {name} set.')
 
 
@@ -134,16 +134,16 @@ class MainApp(tkinter.Frame):
         action, time = TXTVAR_1.get(), TXTVAR_2.get()
 
 
-        if not FILES_PATH.get('account-path'):
+        if not FILES_PATH.get('account'):
             return logger.update('Add required accounts file!')
 
-        if not FILES_PATH.get('link-path') and (subscription or repost or like):
+        if not FILES_PATH.get('link') and any((subscription, repost, like)):
             return logger.update('Add a file with links!')
 
-        if action.isdigit() is False or time.isdigit() is False:
+        if not all((action.isdigit(), time.isdigit())):
             return logger.update('Enter a numeric value into the action and time fields!')
 
-        if not (subscription or repost or like or check_account):
+        if not any((subscription, repost, like, check_account)):
             return logger.update('Select at least one checkbox!')
 
         if utils.check_internet() is False:

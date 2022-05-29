@@ -93,9 +93,9 @@ def repost(driver: webdriver.Chrome, wait: WebDriverWait, link: str) -> None:
 
 
 def manage_account(self, event: StartEvent) -> None:
-    account_path = event.files_path.get('account-path')
-    proxy_path = event.files_path.get('proxy-path', '')
-    link_path = event.files_path.get('link-path')
+    account_path = event.files_path.get('account')
+    proxy_path = event.files_path.get('proxy')
+    link_path = event.files_path.get('link')
     logger = event.logger
 
     actions = 0
@@ -135,26 +135,23 @@ def manage_account(self, event: StartEvent) -> None:
 
         for link in utils.file_parser(link_path):
             try:
-                if event.subscription is True:
+                if event.subscription:
                     subscription(driver, wait, link)
                     logger.update(f'{user} - Subscribed.')
-
-                elif event.repost is True:
+                elif event.repost:
                     repost(driver, wait, link)
                     logger.update(f'{user} - Reposted post.')
-
-                elif event.like is True:
+                elif event.like:
                     liked(driver, wait, link)
                     logger.update(f'{user} - Liked post.')
-
             except (exceptions.NoSuchElementException, exceptions.TimeoutException):
                 continue
 
-        if actions >= event.action:
-            break
-
         time.sleep(random.randint(0, event.time))
         actions += 1
+
+        if actions >= event.action:
+            break
 
     logger.update('Process completed.')
     driver.quit()

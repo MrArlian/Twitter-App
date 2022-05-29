@@ -62,32 +62,12 @@ def _login(driver: webdriver.Chrome, wait: WebDriverWait, user: str, password: s
             raise TwoFactor
 
 
-def _grab_data(driver: webdriver.Chrome) -> tuple:
-    panel = driver.find_element(By.XPATH, '//nav[@role="navigation"]')
-    panel.find_element(By.XPATH, '//a[@data-testid="AppTabBar_Profile_Link"]').click()
-    time.sleep(3)
-
-    info_panel = driver.find_element(By.CLASS_NAME, 'css-1dbjc4n.r-1ifxtd0.r-ymttw5.r-ttdzmv')
-
-    tweet = driver.find_element(By.CLASS_NAME, 'css-901oao.css-bfa6kz.r-14j79pv.r-37j5jr')
-    num_tweets = tweet.text.split(' ')[0]
-
-    reg_div = info_panel.find_element(By.XPATH, '//div[@data-testid="UserProfileHeader_Items"]')
-    create_at = reg_div.text.split(' ', 1)[1]
-
-    element = info_panel.find_element(By.CLASS_NAME, 'css-1dbjc4n.r-13awgt0.r-18u37iz')
-    followers = element.find_element(By.XPATH, '//div[@class="css-1dbjc4n"]/a')
-    num_followers = followers.text.split(' ')[0]
-
-    return create_at, num_followers, num_tweets
-
-
 def checking(self, event: StartEvent) -> None:
-    account_path = event.files_path.get('account-path')
-    proxy_path = event.files_path.get('proxy-path', '')
+    account_path = event.files_path.get('account')
+    proxy_path = event.files_path.get('proxy')
     logger = event.logger
 
-    users, actions = [], 0
+    actions = 0
 
 
     if proxy_path:
@@ -125,20 +105,14 @@ def checking(self, event: StartEvent) -> None:
             continue
 
         logger.update(f'{user} - Successful login.')
-
-        try:
-            users.append((user, *_grab_data(driver)))
-        except (exceptions.NoSuchElementException, exceptions.TimeoutException):
-            continue
+        utils.write_account('successful', user, password)
+        time.sleep(random.randint(0, event.time))
+        actions += 1
 
         if actions >= event.action:
             break
 
-        time.sleep(random.randint(0, event.time))
-        actions += 1
-
     logger.update('Process completed.')
-    utils.write_data(users)
     driver.quit()
 
     self.button_start.config(state=tkinter.NORMAL)
